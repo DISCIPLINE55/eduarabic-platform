@@ -7,6 +7,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Slider } from '@/components/ui/slider';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
   Play, Pause, Square, SkipBack, SkipForward, Repeat, Search,
   BookOpen, Volume2, ChevronLeft, ChevronRight, Loader2,
@@ -139,20 +140,33 @@ const SURAHS: SurahMeta[] = [
   { number: 114, name: 'الناس', englishName: 'An-Nas', englishNameTranslation: 'The Mankind', numberOfAyahs: 6, revelationType: 'Meccan' },
 ];
 
-// Reciter identifier for cdn.islamic.network
-const RECITER = 'ar.alafasy';  // Mishary Rashid Alafasy — high quality, widely available
+// Available reciters on everyayah.com CDN (verified 200 OK)
+interface Reciter {
+  id: string;
+  name: string;
+  folder: string;
+}
+const RECITERS: Reciter[] = [
+  { id: 'alafasy',    name: 'Mishary Alafasy',       folder: 'Alafasy_128kbps' },
+  { id: 'abdulsamad', name: 'Abdul Samad',            folder: 'AbdulSamad_64kbps_QuranExplorer.Com' },
+  { id: 'maher',      name: 'Maher Al-Muaiqly',       folder: 'MaherAlMuaiqly128kbps' },
+  { id: 'ghamadi',    name: 'Saad Al-Ghamdi',         folder: 'Ghamadi_40kbps' },
+  { id: 'minshawi',   name: 'Mohamed Siddiq Minshawi',folder: 'Minshawy_Murattal_128kbps' },
+  { id: 'tablaway',   name: 'Mohammad Al-Tablaway',   folder: 'Mohammad_al_Tablaway_128kbps' },
+];
 
 // ── Audio URL helpers ─────────────────────────────────────────────────────────
-function audioUrl(surahNo: number, ayahNo: number): string {
+function audioUrl(surahNo: number, ayahNo: number, folder: string): string {
+  // everyayah.com CDN — verified working, format: SSSAAA.mp3
   const s = String(surahNo).padStart(3, '0');
   const a = String(ayahNo).padStart(3, '0');
-  return `https://cdn.islamic.network/quran/audio/128/${RECITER}/${s}${a}.mp3`;
+  return `https://everyayah.com/data/${folder}/${s}${a}.mp3`;
 }
 
-// Quran page image from quran.com CDN (Uthmanic Hafs, 604 pages)
+// Quran page images via quran.com public API (verse text fallback — images use API)
 function pageImageUrl(page: number): string {
-  const p = String(page).padStart(3, '0');
-  return `https://static.qurancdn.com/images/pages/hafs-nastaleeq/page-${p}.webp`;
+  // Using quran.com CDN — correct format (no leading zeros, .png)
+  return `https://quran.com/images/pages/p${page}.png`;
 }
 
 // ── Page start lookup (surah → first page) ────────────────────────────────────
@@ -183,6 +197,7 @@ export default function QuranViewerPage() {
 
   // Audio player
   const [currentAyah, setCurrentAyah] = useState(1);
+  const [selectedReciter, setSelectedReciter] = useState<Reciter>(RECITERS[0]);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isRepeat, setIsRepeat] = useState(false);
   const [speed, setSpeed] = useState(1);
@@ -206,11 +221,11 @@ export default function QuranViewerPage() {
   };
 
   // ── Audio engine ─────────────────────────────────────────────────────────
-  const loadAudio = useCallback((surah: SurahMeta, ayah: number) => {
+  const loadAudio = useCallback((surah: SurahMeta, ayah: number, reciter: Reciter) => {
     if (!audioRef.current) return;
     const el = audioRef.current;
     el.pause();
-    el.src = audioUrl(surah.number, ayah);
+    el.src = audioUrl(surah.number, ayah, reciter.folder);
     el.playbackRate = speed;
     setAudioLoading(true);
     setProgress(0);
@@ -219,9 +234,9 @@ export default function QuranViewerPage() {
 
   useEffect(() => {
     if (view === 'audio' && selectedSurah) {
-      loadAudio(selectedSurah, currentAyah);
+      loadAudio(selectedSurah, currentAyah, selectedReciter);
     }
-  }, [view, selectedSurah, currentAyah, loadAudio]);
+  }, [view, selectedSurah, currentAyah, selectedReciter, loadAudio]);
 
   useEffect(() => {
     if (audioRef.current) audioRef.current.playbackRate = speed;
@@ -459,6 +474,27 @@ export default function QuranViewerPage() {
               <p className="text-sm text-muted-foreground">
                 Ayah {currentAyah} / {selectedSurah.numberOfAyahs}
               </p>
+            </div>
+
+            {/* Reciter selector */}
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-muted-foreground shrink-0 w-12">Reciter</span>
+              <Select
+                value={selectedReciter.id}
+                onValueChange={(val) => {
+                  const r = RECITERS.find(r => r.id === val);
+                  if (r) { setSelectedReciter(r); setIsPlaying(false); }
+                }}
+              >
+                <SelectTrigger className="flex-1 h-8 text-xs">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {RECITERS.map(r => (
+                    <SelectItem key={r.id} value={r.id} className="text-xs">{r.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             {/* Ayah selector */}
