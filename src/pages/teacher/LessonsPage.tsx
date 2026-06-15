@@ -31,7 +31,7 @@ export default function LessonsPage() {
   const fetchData = async () => {
     if (!orgId || !profile) return;
     const [{ data: subs }, { data: lsns }] = await Promise.all([
-      supabase.from('subjects').select('*').eq('organization_id', orgId).eq('teacher_id', profile.id).order('name'),
+      supabase.from('subjects').select('*').eq('organization_id', orgId).order('name'),
       supabase.from('lessons').select('*, subjects(name)').eq('organization_id', orgId).is('deleted_at', null).order('created_at', { ascending: false }),
     ]);
     setSubjects(subs || []);

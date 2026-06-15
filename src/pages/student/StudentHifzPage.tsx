@@ -47,7 +47,7 @@ export default function StudentHifzPage() {
   const fetchData = async () => {
     if (!orgId || !profile) return;
     const [{ data: student }, { data: hifz }, { data: subs }, { data: teacher }] = await Promise.all([
-      supabase.from('students').select('id').eq('organization_id', orgId).maybeSingle(),
+      supabase.from('students').select('id').eq('organization_id', orgId).eq('profile_id', profile.id).maybeSingle(),
       supabase.from('hifz_progress').select('*').eq('organization_id', orgId).order('updated_at', { ascending: false }),
       supabase.from('audio_submissions').select('*').eq('organization_id', orgId).order('created_at', { ascending: false }).limit(20),
       supabase.from('profiles').select('id').eq('organization_id', orgId).eq('role', 'teacher').limit(1).maybeSingle(),

@@ -14,10 +14,16 @@ export default function StudentAttendancePage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!orgId) return;
-    supabase.from('attendance').select('*').eq('organization_id', orgId).order('date', { ascending: false }).limit(30)
-      .then(({ data }) => { setRecords(data || []); setLoading(false); });
-  }, [orgId]);
+    if (!orgId || !profile) return;
+    // First resolve student record linked to this auth user, then fetch their attendance
+    supabase.from('students').select('id').eq('organization_id', orgId).eq('profile_id', profile.id).maybeSingle()
+      .then(({ data: student }) => {
+        if (!student) { setLoading(false); return; }
+        supabase.from('attendance').select('*').eq('organization_id', orgId).eq('student_id', student.id)
+          .order('date', { ascending: false }).limit(30)
+          .then(({ data }) => { setRecords(data || []); setLoading(false); });
+      });
+  }, [orgId, profile]);
 
   const presentCount = records.filter(r => r.status === 'present').length;
   const rate = records.length ? Math.round((presentCount / records.length) * 100) : 0;

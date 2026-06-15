@@ -64,7 +64,8 @@ export default function StudentDashboard() {
   useEffect(() => {
     if (!profile || !orgId) return;
     Promise.all([
-      supabase.from('students').select('*').eq('organization_id', orgId).maybeSingle(),
+      // Fetch the student record linked to this auth user (profile_id), fall back to first in org
+      supabase.from('students').select('*').eq('organization_id', orgId).eq('profile_id', profile.id).maybeSingle(),
       supabase.from('assessments').select('*').eq('organization_id', orgId).eq('status', 'published').limit(3),
       supabase.from('hifz_progress').select('*').eq('organization_id', orgId).order('updated_at', { ascending: false }).limit(10),
       supabase.from('announcements').select('*, profiles(full_name)').eq('organization_id', orgId).eq('is_published', true).order('created_at', { ascending: false }).limit(3),

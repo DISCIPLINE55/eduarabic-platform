@@ -49,6 +49,7 @@ export default function StudentAssessmentsPage() {
   const [assessments, setAssessments] = useState<any[]>([]);
   const [submissions, setSubmissions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [studentId, setStudentId] = useState<string | null>(null);
   const [selectedAssessment, setSelectedAssessment] = useState<any>(null);
   const [accessCode, setAccessCode] = useState('');
   const [started, setStarted] = useState(false);
@@ -83,13 +84,19 @@ export default function StudentAssessmentsPage() {
   }, [timer, started, warnedTime]);
 
   const fetchData = async () => {
-    if (!orgId) return;
+    if (!orgId || !profile) return;
+    // Get the student record for this user so we can filter their own submissions
+    const { data: studentRec } = await supabase.from('students').select('id').eq('organization_id', orgId).eq('profile_id', profile.id).maybeSingle();
+    const resolvedStudentId = studentRec?.id ?? null;
+    setStudentId(resolvedStudentId);
     const [{ data: assmts }, { data: subs }] = await Promise.all([
       supabase.from('assessments').select('*, subjects(name)').eq('organization_id', orgId).eq('status', 'published').order('created_at', { ascending: false }),
-      supabase.from('assessment_submissions').select('assessment_id, status, score').eq('organization_id', orgId),
+      resolvedStudentId
+        ? supabase.from('assessment_submissions').select('assessment_id, status, score').eq('organization_id', orgId).eq('student_id', resolvedStudentId)
+        : Promise.resolve({ data: [] }),
     ]);
     setAssessments(assmts || []);
-    setSubmissions(subs || []);
+    setSubmissions((subs as any[]) || []);
     setLoading(false);
   };
 
@@ -142,7 +149,7 @@ export default function StudentAssessmentsPage() {
     const { error } = await supabase.from('assessment_submissions').insert({
       organization_id: orgId,
       assessment_id: selectedAssessment.id,
-      student_id: profile?.id,
+      student_id: studentId ?? profile?.id,
       answers: answers,
       score: score,
       status: 'submitted',

@@ -15,10 +15,16 @@ export default function StudentCertificatesPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!orgId) return;
-    supabase.from('certificates').select('*').eq('organization_id', orgId).order('issued_date', { ascending: false })
-      .then(({ data }) => { setCertificates(data || []); setLoading(false); });
-  }, [orgId]);
+    if (!orgId || !profile) return;
+    // Resolve student record linked to this auth user first
+    supabase.from('students').select('id').eq('organization_id', orgId).eq('profile_id', profile.id).maybeSingle()
+      .then(({ data: student }) => {
+        if (!student) { setLoading(false); return; }
+        supabase.from('certificates').select('*').eq('organization_id', orgId).eq('student_id', student.id)
+          .order('issued_date', { ascending: false })
+          .then(({ data }) => { setCertificates(data || []); setLoading(false); });
+      });
+  }, [orgId, profile]);
 
   const typeColors: Record<string, string> = {
     completion: 'bg-info/10 text-info border-info/30',

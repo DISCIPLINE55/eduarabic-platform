@@ -21,8 +21,10 @@ export default function TeacherDashboard() {
       supabase.from('assessments').select('*', { count: 'exact', head: true }).eq('created_by', profile.id).eq('organization_id', orgId),
       supabase.from('audio_submissions').select('*', { count: 'exact', head: true }).eq('teacher_id', profile.id).eq('status', 'pending'),
       supabase.from('assessments').select('id, title, type, status, created_at').eq('created_by', profile.id).eq('organization_id', orgId).order('created_at', { ascending: false }).limit(5),
-    ]).then(([{ count: classes }, { count: assessments }, { count: audio }, { data: recent }]) => {
-      setStats({ classes: classes || 0, assessments: assessments || 0, audioQueue: audio || 0, hifzStudents: 0 });
+      supabase.from('hifz_progress').select('student_id').eq('organization_id', orgId).eq('teacher_id', profile.id),
+    ]).then(([{ count: classes }, { count: assessments }, { count: audio }, { data: recent }, { data: hifzRows }]) => {
+      const uniqueHifzStudents = new Set((hifzRows || []).map(r => r.student_id)).size;
+      setStats({ classes: classes || 0, assessments: assessments || 0, audioQueue: audio || 0, hifzStudents: uniqueHifzStudents });
       setRecentAssessments(recent || []);
       setLoading(false);
     });

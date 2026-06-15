@@ -17,7 +17,7 @@ export default function ParentFeesPage() {
   useEffect(() => {
     if (!orgId) return;
     Promise.all([
-      supabase.from('students').select('*').eq('organization_id', orgId).maybeSingle(),
+      supabase.from('students').select('*').eq('organization_id', orgId).eq('guardian_email', profile?.email ?? '').maybeSingle(),
       supabase.from('student_payments').select('*, fee_structures(name, amount, frequency)').eq('organization_id', orgId).order('payment_date', { ascending: false }),
     ]).then(([{ data: s }, { data: pays }]) => {
       setStudent(s);

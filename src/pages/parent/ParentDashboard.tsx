@@ -16,9 +16,10 @@ export default function ParentDashboard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!orgId) return;
+    if (!orgId || !profile) return;
     Promise.all([
-      supabase.from('students').select('*').eq('organization_id', orgId).maybeSingle(),
+      // Parent sees child linked to them: first try guardian_email match, then org fallback
+      supabase.from('students').select('*').eq('organization_id', orgId).eq('guardian_email', profile.email ?? '').maybeSingle(),
       supabase.from('announcements').select('*, profiles(full_name)').eq('organization_id', orgId).eq('is_published', true).order('created_at', { ascending: false }).limit(4),
       supabase.from('hifz_progress').select('*').eq('organization_id', orgId).order('updated_at', { ascending: false }).limit(5),
     ]).then(([{ data: child }, { data: ann }, { data: hifz }]) => {

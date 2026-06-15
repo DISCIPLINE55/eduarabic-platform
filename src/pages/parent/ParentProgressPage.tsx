@@ -21,9 +21,9 @@ export default function ParentProgressPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!orgId) return;
+    if (!orgId || !profile) return;
     Promise.all([
-      supabase.from('students').select('*').eq('organization_id', orgId).maybeSingle(),
+      supabase.from('students').select('*').eq('organization_id', orgId).eq('guardian_email', profile.email ?? '').maybeSingle(),
       supabase.from('assessment_submissions').select('*, assessments(title, type)').eq('organization_id', orgId).order('created_at', { ascending: false }).limit(10),
       supabase.from('attendance').select('*').eq('organization_id', orgId).order('date', { ascending: false }).limit(30),
       supabase.from('hifz_progress').select('*').eq('organization_id', orgId).order('updated_at', { ascending: false }),
