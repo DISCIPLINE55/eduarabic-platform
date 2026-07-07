@@ -1,0 +1,198 @@
+/* stylelint-disable */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Noto+Sans+Arabic:wght@300;400;500;600;700&display=swap');
+
+@layer base {
+  :root {
+    --radius: 0.5rem;
+
+    /* ── DisciNet Brand — Light Theme ────────────────────────────
+       Primary   #0EA5A0  → 178 84% 35%
+       PrimaryHv #0C8F8A  → 177 83% 30%
+       Accent    #D4AF37  → 42  67% 52%
+       Background#F8FAFC  → 210 40% 98%
+       Surface   #FFFFFF  → 0   0%  100%
+       TextPrimary#111827 → 222 47% 11%
+       TextSecond#6B7280  → 220 9%  46%
+       Border    #E5E7EB  → 220 13% 91%
+    ──────────────────────────────────────────────────────────── */
+    --background: 210 40% 98%;
+    --foreground: 222 47% 11%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+
+    --primary: 178 84% 35%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 210 30% 94%;
+    --secondary-foreground: 222 47% 11%;
+
+    --muted: 210 40% 96%;
+    --muted-foreground: 220 9% 46%;
+
+    --accent: 42 67% 52%;
+    --accent-foreground: 222 47% 11%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 178 84% 35%;
+
+    /* Status */
+    --success: 142 71% 32%;
+    --success-foreground: 0 0% 98%;
+    --warning: 38 92% 45%;
+    --warning-foreground: 0 0% 98%;
+    --info: 217 91% 50%;
+    --info-foreground: 0 0% 98%;
+
+    /* Charts — teal / gold / green / blue / purple */
+    --chart-1: 178 84% 35%;
+    --chart-2: 42 67% 52%;
+    --chart-3: 142 71% 32%;
+    --chart-4: 217 91% 50%;
+    --chart-5: 270 60% 50%;
+
+    /* Sidebar — Primary Navy #001B2A */
+    --sidebar-background: 201 100% 8%;
+    --sidebar-foreground: 210 40% 95%;
+    --sidebar-primary: 178 84% 42%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 201 80% 14%;
+    --sidebar-accent-foreground: 210 40% 95%;
+    --sidebar-border: 201 60% 16%;
+    --sidebar-ring: 42 67% 52%;
+  }
+
+  .dark {
+    /* ── DisciNet Brand — Dark Theme ─────────────────────────────
+       Primary   #0EA5A0  → 178 84% 35%
+       PrimaryHv #14B8B5  → 178 80% 40%
+       Accent    #D4AF37  → 42  67% 52%
+       Background#0D1117  → 214 50% 7%
+       Surface   #161B22  → 213 30% 11%
+       TextPrimary#F8FAFC → 210 40% 98%
+       TextSecond#9CA3AF  → 220 14% 65%
+       Border    #2A313C  → 215 20% 20%
+    ──────────────────────────────────────────────────────────── */
+    --background: 214 50% 7%;
+    --foreground: 210 40% 98%;
+
+    --card: 213 30% 11%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 213 30% 11%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 178 84% 35%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 215 22% 17%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 213 30% 11%;
+    --muted-foreground: 220 14% 65%;
+
+    --accent: 42 67% 52%;
+    --accent-foreground: 222 47% 11%;
+
+    --destructive: 0 62% 40%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 215 20% 20%;
+    --input: 215 20% 20%;
+    --ring: 178 84% 35%;
+
+    --success: 142 60% 40%;
+    --success-foreground: 0 0% 98%;
+    --warning: 38 80% 50%;
+    --warning-foreground: 0 0% 10%;
+    --info: 217 80% 60%;
+    --info-foreground: 0 0% 98%;
+
+    --chart-1: 178 84% 35%;
+    --chart-2: 42 67% 52%;
+    --chart-3: 142 60% 40%;
+    --chart-4: 217 80% 60%;
+    --chart-5: 270 50% 60%;
+
+    /* Sidebar dark — deeper navy */
+    --sidebar-background: 201 100% 5%;
+    --sidebar-foreground: 210 30% 88%;
+    --sidebar-primary: 178 84% 42%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 201 80% 10%;
+    --sidebar-accent-foreground: 210 30% 88%;
+    --sidebar-border: 201 50% 12%;
+    --sidebar-ring: 46 60% 48%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Poppins', 'Noto Sans Arabic', sans-serif;
+  }
+
+  /* Scrollbar */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--border)) transparent;
+  }
+  *::-webkit-scrollbar { width: 6px; background: transparent; }
+  *::-webkit-scrollbar-thumb { background: hsl(var(--border)); border-radius: 3px; }
+
+  /* Arabic text support */
+  [lang="ar"], .arabic-text {
+    font-family: 'Noto Sans Arabic', sans-serif;
+    direction: rtl;
+  }
+  .font-arabic {
+    font-family: 'Noto Sans Arabic', sans-serif;
+  }
+}
+
+@layer utilities {
+  .gradient-text {
+    background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent)));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+  }
+
+  .sidebar-item-active {
+    @apply bg-sidebar-accent text-sidebar-accent-foreground font-medium;
+  }
+
+  /* ── Dark mode: depth via brightness not shadow ── */
+  .dark .shadow-sm  { box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.4); }
+  .dark .shadow-md  { box-shadow: 0 4px 8px -1px rgb(0 0 0 / 0.5); }
+  .dark .shadow-lg  { box-shadow: 0 8px 16px -3px rgb(0 0 0 / 0.6); }
+  .dark .shadow-xl  { box-shadow: 0 12px 24px -4px rgb(0 0 0 / 0.7); }
+  .dark .shadow-2xl { box-shadow: 0 20px 40px -6px rgb(0 0 0 / 0.75); }
+
+  /* ── Dark mode: second elevation level via border brightening ── */
+  .dark .card-elevated {
+    @apply border-border/60 bg-card;
+    box-shadow: inset 0 1px 0 0 rgb(255 255 255 / 0.04);
+  }
+
+  /* ── Dropzone border ── */
+  .dark .dropzone-border {
+    @apply border-border;
+  }
+}
