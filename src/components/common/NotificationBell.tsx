@@ -42,9 +42,20 @@ export function NotificationBell({ className }: { className?: string }) {
     if (!orgId) return;
     fetchAnnouncements();
 
-    // Realtime subscription
+    // Remove any lingering previous channel before creating a new one.
+    // This prevents "cannot add postgres_changes after subscribe()" when React
+    // StrictMode double-invokes the effect or orgId changes while a channel is
+    // still in a joined/joining state.
+    if (channelRef.current) {
+      supabase.removeChannel(channelRef.current);
+      channelRef.current = null;
+    }
+
+    // Use a unique suffix so Supabase never returns an already-subscribed instance.
+    const channelName = `notifications-${orgId}-${Math.random().toString(36).slice(2)}`;
+
     const channel = supabase
-      .channel(`notifications-${orgId}`)
+      .channel(channelName)
       .on('postgres_changes', {
         event: '*',
         schema: 'public',
@@ -54,7 +65,11 @@ export function NotificationBell({ className }: { className?: string }) {
       .subscribe();
 
     channelRef.current = channel;
-    return () => { supabase.removeChannel(channel); };
+
+    return () => {
+      supabase.removeChannel(channel);
+      channelRef.current = null;
+    };
   }, [orgId]);
 
   const markAllRead = () => {
