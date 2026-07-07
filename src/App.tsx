@@ -9,6 +9,7 @@ import { AppLayout } from '@/components/layouts/AppLayout';
 import { ErrorBoundary } from '@/components/common/ErrorBoundary';
 import { useAuth } from '@/contexts/AuthContext';
 import { routes } from './routes';
+import LandingPage from './pages/LandingPage';
 import type { UserRole } from '@/types/types';
 
 // Standalone (no layout) routes — public auth pages + error pages
@@ -23,22 +24,14 @@ const STANDALONE_PATHS = [
 
 const LoadingScreen = () => <SplashScreen />;
 
-function RootRedirect() {
+/** Redirect authenticated users to their role home; unauthenticated → /login */
+function AppRedirect() {
   const { user, profile, profileLoaded, loading } = useAuth();
 
-  // Still resolving auth/profile — show spinner
   if (loading || !profileLoaded) return <LoadingScreen />;
-
-  // Not logged in
   if (!user) return <Navigate to="/login" replace />;
-
-  // Profile fetch failed or no profile row — send to login
   if (!profile) return <Navigate to="/login" replace />;
-
-  // Profile incomplete — send to completion wizard
   if (!profile.is_profile_complete) return <Navigate to="/profile-completion" replace />;
-
-  // Admin with no institution — send to onboarding wizard
   if (profile.role === 'admin' && !profile.organization_id) return <Navigate to="/admin/onboarding" replace />;
 
   const roleHome: Record<UserRole, string> = {
@@ -55,12 +48,18 @@ const App: React.FC = () => {
         <AuthProvider>
           <RouteGuard>
             <Routes>
-              <Route path="/" element={<RootRedirect />} />
+              {/* Public marketing landing page */}
+              <Route path="/" element={<LandingPage />} />
 
+              {/* Role-based redirect for logged-in users */}
+              <Route path="/app" element={<AppRedirect />} />
+
+              {/* Standalone auth/error pages (no sidebar layout) */}
               {routes.filter(r => STANDALONE_PATHS.includes(r.path)).map((route, i) => (
                 <Route key={i} path={route.path} element={route.element} />
               ))}
 
+              {/* App pages with sidebar layout */}
               <Route element={<AppLayout />}>
                 {routes.filter(r => !STANDALONE_PATHS.includes(r.path)).map((route, i) => (
                   <Route
@@ -75,6 +74,7 @@ const App: React.FC = () => {
                 ))}
               </Route>
 
+              {/* Catch-all → landing */}
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </RouteGuard>
